@@ -1,0 +1,5 @@
+name: BlockPlacersAndBreakers
+author: eirikh1996
+main: io.github.eirikh1996.blockplacersandbreakers.BlockPlacersAndBreakers
+version: 1.0
+api-version: 1.13
