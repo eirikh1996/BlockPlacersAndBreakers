@@ -15,7 +15,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Logger;
 
 import static io.github.eirikh1996.blockplacersandbreakers.Messages.TAB;
 
@@ -33,13 +32,20 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        String packageName = this.getServer().getClass().getPackage().getName();
+        String version = packageName.substring(packageName.lastIndexOf('.') + 1);
+        String[] parts = version.split("_");
+        int versionNumber = Integer.valueOf(parts[1]);
         saveDefaultConfig();
         saveResource("placersandbreakers.yml",false);
-        Settings.is1_13 = true;
+
+        Settings.is1_13 = versionNumber > 12;
+        getLogger().info("Detected server version: " + getServer().getVersion());
         blockBreakers.addAll(getBlockBreakersFromFile());
         blockPlacers.addAll(getBlockPlacersFromFile());
         Settings.tool = Material.getMaterial(getConfig().getString("Tool","WOODEN_HOE"));
-        Settings.ApplyDamageToBreakerPickaxe = getConfig().getBoolean("ApplyDamageToBreakerPickaxe", false);
+        Settings.ApplyDamageToBreakerPickaxe = getConfig().getBoolean("ApplyDamageToBreakerPickaxe", true);
+        this.getCommand("BlockPlacersAndBreakers").setExecutor(new MainCommand(this));
         if (getServer().getPluginManager().getPlugin("Vault") != null){
             RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
             if (rsp != null){

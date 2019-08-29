@@ -1,5 +1,12 @@
 name: BlockPlacersAndBreakers
 author: eirikh1996
 main: io.github.eirikh1996.blockplacersandbreakers.BlockPlacersAndBreakers
-version: 1.0
+version: 1.1
+softdepend:
+  - Vault
 api-version: 1.13
+commands:
+  blockplacersandbreakers:
+    aliases:
+      - bpb
+    usage: /blockplacersandbreakers or /bpb
