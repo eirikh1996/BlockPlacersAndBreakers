@@ -6,6 +6,7 @@ import io.github.eirikh1996.blockplacersandbreakers.events.BlockBreakerCreateEve
 import io.github.eirikh1996.blockplacersandbreakers.events.BlockPlacerCreateEvent;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockBreaker;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockPlacer;
+import io.github.eirikh1996.blockplacersandbreakers.utils.WorldGuardUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.block.Dispenser;
 import org.bukkit.entity.Player;
@@ -50,6 +51,10 @@ public class InteractListener implements Listener {
                 p.sendMessage(BPB_PREFIX + "This dispenser is no longer a block placer");
                 bpb.getBlockPlacers().remove(BlockPlacer.at(d.getLocation()));
             } else {
+                if (bpb.getWorldGuardPlugin() != null && !WorldGuardUtils.allowedToBuild(p, d.getLocation())){
+                    p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block placer in this WorldGuard region!");
+                    return;
+                }
                 if (eco != null && !eco.has(p, Settings.PlacerCreateCost)){
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot afford to create a block placer!");
                     return;
@@ -86,6 +91,10 @@ public class InteractListener implements Listener {
                 d.setCustomName(null);
                 bpb.getBlockBreakers().remove(BlockBreaker.at(d.getLocation()));
             } else {
+                if (bpb.getWorldGuardPlugin() != null && !WorldGuardUtils.allowedToBuild(p, d.getLocation())){
+                    p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block breaker in this WorldGuard region!");
+                    return;
+                }
                 if (eco != null && !eco.has(p, Settings.BreakerCreateCost)){
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot afford to create a block breaker!");
                     return;

@@ -1,5 +1,6 @@
 package io.github.eirikh1996.blockplacersandbreakers;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import io.github.eirikh1996.blockplacersandbreakers.listener.BlockListener;
 import io.github.eirikh1996.blockplacersandbreakers.listener.InteractListener;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockBreaker;
@@ -9,12 +10,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 import static io.github.eirikh1996.blockplacersandbreakers.Messages.TAB;
 
@@ -24,6 +27,7 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
     private final Set<BlockBreaker> blockBreakers = new HashSet<>();
     private final File file = new File(getDataFolder(),"placersandbreakers.yml");
     private Economy economy;
+    private WorldGuardPlugin worldGuardPlugin;
 
     @Override
     public void onLoad() {
@@ -46,6 +50,15 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
         Settings.tool = Material.getMaterial(getConfig().getString("Tool","WOODEN_HOE"));
         Settings.ApplyDamageToBreakerPickaxe = getConfig().getBoolean("ApplyDamageToBreakerPickaxe", true);
         this.getCommand("BlockPlacersAndBreakers").setExecutor(new MainCommand(this));
+        //Check for WorldGuard
+        Plugin wgPlugin = getServer().getPluginManager().getPlugin("WorldGuard");
+        if (wgPlugin != null){
+            if (wgPlugin instanceof WorldGuardPlugin){
+                worldGuardPlugin = (WorldGuardPlugin) wgPlugin;
+                getLogger().info("Found a compatible version of WorldGuard. Enabling WorldGuard integration");
+            }
+        }
+        //Check for Vault
         if (getServer().getPluginManager().getPlugin("Vault") != null){
             RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
             if (rsp != null){
@@ -80,6 +93,10 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
 
     public Economy getEconomy() {
         return economy;
+    }
+
+    public WorldGuardPlugin getWorldGuardPlugin() {
+        return worldGuardPlugin;
     }
 
     public void updatePBFile(){

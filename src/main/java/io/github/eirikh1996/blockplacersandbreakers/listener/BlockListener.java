@@ -2,6 +2,8 @@ package io.github.eirikh1996.blockplacersandbreakers.listener;
 
 import io.github.eirikh1996.blockplacersandbreakers.BlockPlacersAndBreakers;
 import io.github.eirikh1996.blockplacersandbreakers.Settings;
+import io.github.eirikh1996.blockplacersandbreakers.events.BlockBreakerBreakBlockEvent;
+import io.github.eirikh1996.blockplacersandbreakers.events.BlockPlacerPlaceBlockEvent;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockBreaker;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockPlacer;
 import org.bukkit.Bukkit;
@@ -11,6 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Dispenser;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -36,23 +39,7 @@ public class BlockListener implements Listener {
         MINERAL_ORES.add(Material.COAL_ORE);
         MINERAL_ORES.add(Material.NETHER_QUARTZ_ORE);
     }
-    @EventHandler
-    public void onBlockPower(BlockRedstoneEvent event){
-        if (!event.getBlock().getType().equals(Material.DISPENSER)){
-            return;
-        }
-        Dispenser d = (Dispenser) event.getBlock().getState();
-        BlockFace face;
-        if (Settings.is1_13){
-            org.bukkit.block.data.type.Dispenser disp = (org.bukkit.block.data.type.Dispenser) event.getBlock().getBlockData();
-            face = disp.getFacing();
-        } else {
-            org.bukkit.material.Dispenser disp = (org.bukkit.material.Dispenser) d.getData();
-            face = disp.getFacing();
-        }
-        final Block b = event.getBlock().getRelative(face);
 
-    }
     @EventHandler
     public void onItemDispense(BlockDispenseEvent event){
         final ItemStack dispensed = event.getItem();
@@ -116,6 +103,16 @@ public class BlockListener implements Listener {
                     }
                 }
 
+            }
+            //Call event
+            BlockBreakerBreakBlockEvent breakBlockEvent = new BlockBreakerBreakBlockEvent(b, BlockBreaker.at(d.getLocation()));
+            Bukkit.getServer().getPluginManager().callEvent(breakBlockEvent);
+            if (breakBlockEvent.isCancelled()){
+                Player owner = Bukkit.getPlayer(breakBlockEvent.getBlockBreaker().getOwner());
+                if (owner != null && breakBlockEvent.getCancellationMessage().length() > 0){
+                    owner.sendMessage(breakBlockEvent.getCancellationMessage());
+                }
+                return;
             }
             if (silkTouch){
                 b.setType(Material.AIR);
@@ -185,6 +182,16 @@ public class BlockListener implements Listener {
                 dispensedType = Material.WHEAT;
             }
             final Material toPlace = dispensedType;
+            //call event
+            BlockPlacerPlaceBlockEvent placeBlockEvent = new BlockPlacerPlaceBlockEvent(b, BlockPlacer.at(d.getLocation()));
+            Bukkit.getServer().getPluginManager().callEvent(placeBlockEvent);
+            if (placeBlockEvent.isCancelled()){
+                Player owner = Bukkit.getPlayer(placeBlockEvent.getBlockPlacer().getOwner());
+                if (owner != null && placeBlockEvent.getCancellationMessage().length() > 0){
+                    owner.sendMessage(placeBlockEvent.getCancellationMessage());
+                }
+                return;
+            }
             new BukkitRunnable() {
                 @Override
                 public void run() {

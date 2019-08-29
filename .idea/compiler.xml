@@ -9,5 +9,8 @@
         <module name="BlockPlacersAndBreakers" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="legacyWG" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
