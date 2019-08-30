@@ -4,9 +4,21 @@ main: io.github.eirikh1996.blockplacersandbreakers.BlockPlacersAndBreakers
 version: 1.2
 softdepend:
   - Vault
+  - WorldGuard
 api-version: 1.13
 commands:
   blockplacersandbreakers:
     aliases:
       - bpb
     usage: /blockplacersandbreakers or /bpb
+permissions:
+  blockplacersandbreakers.command.breakers:
+    default: true
+  bpb.command.breakers:
+    default: true
+  blockplacersandbreakers.command.placers:
+    default: true
+  bpb.command.placers:
+    default: true
+  bpb.command.help:
+    default: true
