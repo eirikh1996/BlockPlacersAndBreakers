@@ -38,6 +38,7 @@ public class InteractListener implements Listener {
                 event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "You have no permission to create block breakers");
                 return;
             }
+
             if (bpb.getBlockBreakers().contains(BlockBreaker.at(d.getLocation()))){
                 p.sendMessage(BPB_PREFIX + ERROR + "This dispenser is already a block breaker");
                 event.setCancelled(true);
@@ -55,7 +56,15 @@ public class InteractListener implements Listener {
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block placer in this WorldGuard region!");
                     return;
                 }
-                if (eco != null && !eco.has(p, Settings.PlacerCreateCost)){
+                else if (!p.hasPermission("blockplacersandbreakers.blockplacer.limit.none") || !p.hasPermission("bpb.blockplacer.limit.none")){
+                    int max = maxPlacers(p);
+                    int existing = existingPlacers(p);
+                    if (existing >= max){
+                        p.sendMessage(BPB_PREFIX + ERROR + "You have no permission to create more than " + max + " block placers!");
+                        return;
+                    }
+                }
+                else if (eco != null && !eco.has(p, Settings.PlacerCreateCost)){
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot afford to create a block placer!");
                     return;
                 }
@@ -66,22 +75,29 @@ public class InteractListener implements Listener {
                     p.sendMessage(bpce.getCancellationMessage());
                     return;
                 }
+
                 p.sendMessage(BPB_PREFIX + "This dispenser is now a block placer");
+                if (eco != null && Settings.PlacerCreateCost > 0){
+                    eco.withdrawPlayer(p, Settings.PlacerCreateCost);
+                    p.sendMessage(BPB_PREFIX + "Withdrew " + Settings.PlacerCreateCost + " from your balance");
+                }
                 bpb.getBlockPlacers().add(bp);
             }
         } else if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)){
+            //Check if player has permission to create
             if (!event.getPlayer().hasPermission("blockplacersandbreakers.blockplacer.create") && !event.getPlayer().hasPermission("bpb.blockplacer.create")){
                 event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "You have no permission to create block placers");
                 d.setCustomName(null);
                 return;
             }
+            //Check if dispenser is a block placer
             if (bpb.getBlockPlacers().contains(BlockPlacer.at(d.getLocation()))){
                 p.sendMessage(BPB_PREFIX + ERROR + "This dispenser is already a block placer");
                 d.setCustomName("Block placer");
                 event.setCancelled(true);
                 return;
             }
-
+            // check if dispenser is a block breaker
             if (bpb.getBlockBreakers().contains(BlockBreaker.at(d.getLocation()))){
                 if (!BlockBreaker.at(d.getLocation()).getOwner().equals(p.getUniqueId()) && !p.hasPermission("blockplacersandbreakers.blockbreaker.create.others") && !p.hasPermission("bpb.blockbreaker.create.others")){
                     p.sendMessage(BPB_PREFIX + ERROR + "You don't own this block breaker and have no permission to alter its functionality");
@@ -95,6 +111,14 @@ public class InteractListener implements Listener {
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block breaker in this WorldGuard region!");
                     return;
                 }
+                else if (!p.hasPermission("blockplacersandbreakers.blockbreaker.limit.none") || !p.hasPermission("bpb.blockbreaker.limit.none")){
+                    int max = maxBreakers(p);
+                    int existing = existingBreakers(p);
+                    if (existing >= max){
+                        p.sendMessage(BPB_PREFIX + ERROR + "You have no permission to create more than " + max + " block breakers!");
+                        return;
+                    }
+                }
                 if (eco != null && !eco.has(p, Settings.BreakerCreateCost)){
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot afford to create a block breaker!");
                     return;
@@ -107,11 +131,57 @@ public class InteractListener implements Listener {
                     return;
                 }
                 p.sendMessage(BPB_PREFIX + "This dispenser is now a block breaker");
+                if (eco != null && Settings.BreakerCreateCost > 0){
+                    eco.withdrawPlayer(p, Settings.BreakerCreateCost);
+                    p.sendMessage(BPB_PREFIX + "Withdrew " + Settings.BreakerCreateCost + " from your balance");
+                }
                 d.setCustomName("Block breaker");
                 bpb.getBlockBreakers().add(bb);
             }
         }
         bpb.updatePBFile();
         event.setCancelled(true);
+    }
+
+    private int maxPlacers(Player player){
+        int max = Integer.MAX_VALUE;
+        for (int i = 0 ; i < max; i++){
+            if (player.hasPermission("blockplacersandbreakers.blockplacer.limit." + i) || player.hasPermission("bpb.blockplacer.limit." + i)){
+                return i;
+            }
+        }
+        return max;
+    }
+
+    private int maxBreakers(Player player){
+        int max = Integer.MAX_VALUE;
+        for (int i = 0 ; i < max; i++){
+            if (player.hasPermission("blockplacersandbreakers.blockbreaker.limit." + i) || player.hasPermission("bpb.blockbreaker.limit." + i)){
+                return i;
+            }
+        }
+        return max;
+    }
+
+    private int existingPlacers(Player player){
+        int numFound = 0;
+        for (BlockPlacer placer : BlockPlacersAndBreakers.getInstance().getBlockPlacers()){
+            if (!placer.getOwner().equals(player.getUniqueId())){
+                continue;
+            }
+            numFound++;
+        }
+        return numFound;
+    }
+
+    private int existingBreakers(Player player){
+        int numFound = 0;
+        for (BlockBreaker breaker : BlockPlacersAndBreakers.getInstance().getBlockBreakers()){
+            if (!breaker.getOwner().equals(player.getUniqueId())){
+                continue;
+            }
+            numFound++;
+        }
+        return numFound;
     }
 }

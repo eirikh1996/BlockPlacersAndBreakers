@@ -1,7 +1,7 @@
 name: BlockPlacersAndBreakers
 author: eirikh1996
 main: io.github.eirikh1996.blockplacersandbreakers.BlockPlacersAndBreakers
-version: 1.1
+version: 1.2
 softdepend:
   - Vault
 api-version: 1.13

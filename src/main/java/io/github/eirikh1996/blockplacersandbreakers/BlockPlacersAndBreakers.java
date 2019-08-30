@@ -10,6 +10,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,14 +42,20 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
         String version = packageName.substring(packageName.lastIndexOf('.') + 1);
         String[] parts = version.split("_");
         int versionNumber = Integer.valueOf(parts[1]);
-        saveDefaultConfig();
+
         saveResource("placersandbreakers.yml",false);
 
         Settings.is1_13 = versionNumber > 12;
+        if (Settings.is1_13){
+            saveDefaultConfig();
+        } else {
+            saveLegacyConfig();
+        }
+
         getLogger().info("Detected server version: " + getServer().getVersion());
         blockBreakers.addAll(getBlockBreakersFromFile());
         blockPlacers.addAll(getBlockPlacersFromFile());
-        Settings.tool = Material.getMaterial(getConfig().getString("Tool","WOODEN_HOE"));
+        Settings.tool = Material.getMaterial(getConfig().getString("Tool", Settings.is1_13 ? "WOODEN_HOE" : "WOOD_HOE"));
         Settings.ApplyDamageToBreakerPickaxe = getConfig().getBoolean("ApplyDamageToBreakerPickaxe", true);
         this.getCommand("BlockPlacersAndBreakers").setExecutor(new MainCommand(this));
         //Check for WorldGuard
@@ -189,6 +197,20 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
             }
         }
         return ret;
+    }
+
+    private void saveLegacyConfig(){
+        File configFile = new File(getDataFolder(), "config.yml");
+        if (configFile.exists())
+            return;
+        InputStream resource = getResource("config_legacy.yml");
+        Reader reader = new InputStreamReader(resource);
+        FileConfiguration config = YamlConfiguration.loadConfiguration(reader);
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     private class PlacersAndBreakersNotFoundException extends RuntimeException{
         public PlacersAndBreakersNotFoundException(String s, Throwable cause){

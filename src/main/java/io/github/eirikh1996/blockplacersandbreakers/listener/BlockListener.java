@@ -31,13 +31,28 @@ import static io.github.eirikh1996.blockplacersandbreakers.Messages.BPB_PREFIX;
 
 public class BlockListener implements Listener {
     private static final ArrayList<Material> MINERAL_ORES = new ArrayList<>();
+    private static final ArrayList<Material> CROPS = new ArrayList<>();
     static {
         MINERAL_ORES.add(Material.DIAMOND_ORE);
         MINERAL_ORES.add(Material.REDSTONE_ORE);
         MINERAL_ORES.add(Material.LAPIS_ORE);
         MINERAL_ORES.add(Material.EMERALD_ORE);
         MINERAL_ORES.add(Material.COAL_ORE);
-        MINERAL_ORES.add(Material.NETHER_QUARTZ_ORE);
+        if (Settings.is1_13) {
+            MINERAL_ORES.add(Material.NETHER_QUARTZ_ORE);
+        } else {
+            MINERAL_ORES.add(Material.getMaterial("QUARTZ_ORE"));
+        }
+        CROPS.add(Material.BEETROOT_SEEDS);
+        if (Settings.is1_13){
+            CROPS.add(Material.CARROT);
+            CROPS.add(Material.POTATO);
+            CROPS.add(Material.WHEAT_SEEDS);
+        } else {
+            CROPS.add(Material.getMaterial("POTATO_ITEM"));
+            CROPS.add(Material.getMaterial("CARROT_ITEM"));
+            CROPS.add(Material.getMaterial("SEEDS"));
+        }
     }
 
     @EventHandler
@@ -164,7 +179,7 @@ public class BlockListener implements Listener {
 
 
         }
-        if (!dispensed.getType().isBlock()){
+        if (!dispensed.getType().isBlock() || !CROPS.contains(dispensed.getType())){
             return;
         }
 
@@ -178,8 +193,8 @@ public class BlockListener implements Listener {
             if (dispensedType.name().endsWith("CONCRETE_POWDER") && (b.getRelative(BlockFace.EAST).getType() == Material.WATER||b.getRelative(BlockFace.WEST).getType() == Material.WATER||b.getRelative(BlockFace.SOUTH).getType() == Material.WATER||b.getRelative(BlockFace.NORTH).getType() == Material.WATER)){
                 dispensedType = Material.getMaterial(dispensedType.name().replace("_POWDER",""));
             }
-            if (dispensedType.equals(Material.WHEAT_SEEDS)){
-                dispensedType = Material.WHEAT;
+            if (dispensedType.equals(Settings.is1_13 ? Material.WHEAT_SEEDS : Material.getMaterial("SEEDS"))){
+                dispensedType = Settings.is1_13 ? Material.WHEAT : Material.getMaterial("CROPS");
             }
             final Material toPlace = dispensedType;
             //call event
@@ -235,5 +250,4 @@ public class BlockListener implements Listener {
 
 
     }
-
 }
