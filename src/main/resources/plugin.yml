@@ -1,10 +1,12 @@
 name: BlockPlacersAndBreakers
 author: eirikh1996
 main: io.github.eirikh1996.blockplacersandbreakers.BlockPlacersAndBreakers
-version: 1.3
+version: 1.4
 softdepend:
   - Vault
   - WorldGuard
+  - RedProtect
+  - GriefPrevention
 api-version: 1.13
 commands:
   blockplacersandbreakers:
@@ -12,13 +14,15 @@ commands:
       - bpb
     usage: /blockplacersandbreakers or /bpb [help|placers|breakers|info]
 permissions:
-  blockplacersandbreakers.command.breakers:
-    default: true
+
   bpb.command.breakers:
-    default: true
-  blockplacersandbreakers.command.placers:
     default: true
   bpb.command.placers:
     default: true
   bpb.command.help:
     default: true
+
+  bpb.admin:
+    default: op
+    children:
+      bpb.* : true
