@@ -3,7 +3,9 @@ package io.github.eirikh1996.blockplacersandbreakers.update;
 
 import io.github.eirikh1996.blockplacersandbreakers.BlockPlacersAndBreakers;
 import io.github.eirikh1996.blockplacersandbreakers.Messages;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,6 +37,11 @@ public class UpdateManager extends BukkitRunnable {
                     for (int index = 0 ; index < message.length ; index++){
                         BlockPlacersAndBreakers.getInstance().getLogger().warning(ChatColor.stripColor(message[index]));
                     }
+                    for (Player p : Bukkit.getOnlinePlayers()){
+                        if (!p.hasPermission("bpb.update")){
+                            p.sendMessage(message);
+                        }
+                    }
                     return;
                 }
                 BlockPlacersAndBreakers.getInstance().getLogger().info("You are up to date");
@@ -56,7 +63,7 @@ public class UpdateManager extends BukkitRunnable {
         if (running){
             return false;
         }
-        instance.runTaskTimerAsynchronously(BlockPlacersAndBreakers.getInstance(), 0, 1000000);
+        instance.runTaskTimerAsynchronously(BlockPlacersAndBreakers.getInstance(), 0, 100000000);
         running = true;
         return true;
     }
