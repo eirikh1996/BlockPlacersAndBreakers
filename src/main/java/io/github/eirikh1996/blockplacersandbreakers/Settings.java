@@ -8,4 +8,5 @@ public class Settings {
     public static long BreakerCreateCost;
     public static long PlacerCreateCost;
     public static boolean ApplyDamageToBreakerPickaxe;
+    public static boolean debug;
 }

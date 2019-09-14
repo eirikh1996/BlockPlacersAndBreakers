@@ -1,5 +1,6 @@
 package io.github.eirikh1996.blockplacersandbreakers.listener;
 
+import br.net.fabiozumbi12.RedProtect.Bukkit.Region;
 import io.github.eirikh1996.blockplacersandbreakers.BlockPlacersAndBreakers;
 import io.github.eirikh1996.blockplacersandbreakers.Settings;
 import io.github.eirikh1996.blockplacersandbreakers.events.BlockBreakerCreateEvent;
@@ -27,7 +28,7 @@ public class InteractListener implements Listener {
         if (!event.getItem().getType().equals(Settings.tool)){
             return;
         }
-        if (!(event.getClickedBlock().getState() instanceof Dispenser)){
+        if (event.getClickedBlock() != null && !(event.getClickedBlock().getState() instanceof Dispenser)){
             return;
         }
         final Dispenser d = (Dispenser) event.getClickedBlock().getState();
@@ -55,6 +56,14 @@ public class InteractListener implements Listener {
                 if (bpb.getWorldGuardPlugin() != null && !WorldGuardUtils.allowedToBuild(p, d.getLocation())){
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block placer in this WorldGuard region!");
                     return;
+                }
+                //Check if player can create block placers in a RedProtect region
+                if (bpb.getRedProtectPlugin() != null){
+                    Region region = bpb.getRedProtectPlugin().getAPI().getRegion(d.getLocation());
+                    if (!region.canBuild(p)){
+                        p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block placer in this RedProtect region!");
+                        return;
+                    }
                 }
                 else if (!p.hasPermission("blockplacersandbreakers.blockplacer.limit.none") || !p.hasPermission("bpb.blockplacer.limit.none")){
                     int max = maxPlacers(p);
@@ -111,7 +120,14 @@ public class InteractListener implements Listener {
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block breaker in this WorldGuard region!");
                     return;
                 }
-                else if (!p.hasPermission("blockplacersandbreakers.blockbreaker.limit.none") || !p.hasPermission("bpb.blockbreaker.limit.none")){
+                if (bpb.getRedProtectPlugin() != null){
+                    Region region = bpb.getRedProtectPlugin().getAPI().getRegion(d.getLocation());
+                    if (!region.canBuild(p)){
+                        p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block breaker in this RedProtect region!");
+                        return;
+                    }
+                }
+                else if (!p.hasPermission("bpb.blockbreaker.limit.none")){
                     int max = maxBreakers(p);
                     int existing = existingBreakers(p);
                     if (existing >= max){

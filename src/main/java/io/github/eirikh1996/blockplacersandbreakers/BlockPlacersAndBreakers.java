@@ -1,10 +1,12 @@
 package io.github.eirikh1996.blockplacersandbreakers;
 
+import br.net.fabiozumbi12.RedProtect.Bukkit.RedProtect;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import io.github.eirikh1996.blockplacersandbreakers.listener.BlockListener;
 import io.github.eirikh1996.blockplacersandbreakers.listener.InteractListener;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockBreaker;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockPlacer;
+import io.github.eirikh1996.blockplacersandbreakers.update.UpdateManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,6 +32,7 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
     private final File file = new File(getDataFolder(),"placersandbreakers.yml");
     private Economy economy;
     private WorldGuardPlugin worldGuardPlugin;
+    private RedProtect redProtectPlugin;
 
     @Override
     public void onLoad() {
@@ -51,7 +54,8 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
         } else {
             saveLegacyConfig();
         }
-
+        UpdateManager.initialize();
+        Settings.debug = getConfig().getBoolean("debug", false);
         getLogger().info("Detected server version: " + getServer().getVersion());
         blockBreakers.addAll(getBlockBreakersFromFile());
         blockPlacers.addAll(getBlockPlacersFromFile());
@@ -65,6 +69,12 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
                 worldGuardPlugin = (WorldGuardPlugin) wgPlugin;
                 getLogger().info("Found a compatible version of WorldGuard. Enabling WorldGuard integration");
             }
+        }
+        //Check for RedProtect
+        Plugin rp = getServer().getPluginManager().getPlugin("RedProtect");
+        if (rp instanceof RedProtect){
+            getLogger().info("Found a compatible version of RedProtect. Enabling RedProtect integration");
+            redProtectPlugin = (RedProtect) rp;
         }
         //Check for Vault
         if (getServer().getPluginManager().getPlugin("Vault") != null){
@@ -107,6 +117,10 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
         return worldGuardPlugin;
     }
 
+    public RedProtect getRedProtectPlugin() {
+        return redProtectPlugin;
+    }
+
     public void updatePBFile(){
 
         try {
@@ -117,20 +131,24 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
             writer.println("#DO NOT EDIT OR IMPORTANT DATA WILL BE CORRUPTED!");
             writer.println("placers:");
             if (!getBlockPlacers().isEmpty()) {
+                int entry = 0;
                 for (BlockPlacer bp : getBlockPlacers()) {
                     Location l = bp.getLocation();
-                    writer.println(TAB + l.getWorld().getUID().toString() + ":");
+                    writer.println(TAB + l.getWorld().getUID().toString() + "_" + entry + ":");
                     writer.println(TAB + TAB + "location: [" + l.getBlockX() + ", " + l.getBlockY()  + ", " + l.getBlockZ() + "]");
                     writer.println(TAB + TAB + "owner: " + bp.getOwner().toString());
+                    entry++;
                 }
             }
             writer.println("breakers:");
             if (!getBlockBreakers().isEmpty()) {
+                int entry = 0;
                 for (BlockBreaker bb : getBlockBreakers()) {
                     Location l = bb.getLocation();
-                    writer.println(TAB + l.getWorld().getUID().toString() + ":");
+                    writer.println(TAB + l.getWorld().getUID().toString() + "_" + entry +  ":");
                     writer.println(TAB + TAB + "location: [" + l.getBlockX() + ", " + l.getBlockY()  + ", " + l.getBlockZ() + "]");
                     writer.println(TAB + TAB + "owner: " + bb.getOwner().toString());
+                    entry++;
                 }
             }
             writer.close();
@@ -149,12 +167,15 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
             throw new PlacersAndBreakersNotFoundException("No placer or breaker data found!",e);
         }
         if (!data.containsKey("placers"))
-            return Collections.emptySet();;
+            return Collections.emptySet();
         final HashMap<String,Object> placerData = (HashMap<String, Object>) data.get("placers");
         if (placerData == null)
             return Collections.emptySet();
+        if (Settings.debug)
+            getLogger().info(String.format("Loading %d stored block placer entries", placerData.entrySet().size()));
         for (Map.Entry<String, Object> entry : placerData.entrySet()){
-            UUID wID = UUID.fromString(entry.getKey());
+            String[] parts = entry.getKey().split("_");
+            UUID wID = UUID.fromString(parts[0]);
             Map<String, Object> placerDataMap = (Map<String, Object>) entry.getValue();
 
             int x = ((ArrayList<Integer>)placerDataMap.get("location")).get(0);
@@ -183,8 +204,11 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
         final HashMap<String,Object> breakerData = (HashMap<String, Object>) data.get("breakers");
         if (breakerData == null)
             return Collections.emptySet();
+        if (Settings.debug)
+            getLogger().info(String.format("Loading %d stored block breaker entries", breakerData.entrySet().size()));
         for (Map.Entry<String, Object> entry : breakerData.entrySet()){
-            UUID wID = UUID.fromString(entry.getKey());
+            String[] parts = entry.getKey().split("_");
+            UUID wID = UUID.fromString(parts[0]);
             Map<String, Object> placerDataMap = (Map<String, Object>) entry.getValue();
 
             int x = ((ArrayList<Integer>)placerDataMap.get("location")).get(0);
