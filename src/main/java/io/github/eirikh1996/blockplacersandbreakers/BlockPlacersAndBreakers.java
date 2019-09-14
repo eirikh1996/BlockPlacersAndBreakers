@@ -7,6 +7,7 @@ import io.github.eirikh1996.blockplacersandbreakers.listener.InteractListener;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockBreaker;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockPlacer;
 import io.github.eirikh1996.blockplacersandbreakers.update.UpdateManager;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,6 +34,7 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
     private Economy economy;
     private WorldGuardPlugin worldGuardPlugin;
     private RedProtect redProtectPlugin;
+    private GriefPrevention griefPreventionPlugin;
 
     @Override
     public void onLoad() {
@@ -76,6 +78,12 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
             getLogger().info("Found a compatible version of RedProtect. Enabling RedProtect integration");
             redProtectPlugin = (RedProtect) rp;
         }
+        //Check for GriefPrevention
+        Plugin gp = getServer().getPluginManager().getPlugin("GriefPrevention");
+        if (gp instanceof GriefPrevention){
+            getLogger().info("Found a compatible version of GriefPrevention. Enabling RedProtect integration");
+            griefPreventionPlugin = (GriefPrevention) gp;
+        }
         //Check for Vault
         if (getServer().getPluginManager().getPlugin("Vault") != null){
             RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
@@ -95,6 +103,7 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockListener(),this);
         getServer().getPluginManager().registerEvents(new InteractListener(),this);
         getLogger().info(String.format("Loaded %d block placers and %d block breakers",blockPlacers.size(),blockBreakers.size()));
+        UpdateManager.getInstance().start();
     }
 
     public static BlockPlacersAndBreakers getInstance() {
@@ -119,6 +128,10 @@ public class BlockPlacersAndBreakers extends JavaPlugin {
 
     public RedProtect getRedProtectPlugin() {
         return redProtectPlugin;
+    }
+
+    public GriefPrevention getGriefPreventionPlugin() {
+        return griefPreventionPlugin;
     }
 
     public void updatePBFile(){

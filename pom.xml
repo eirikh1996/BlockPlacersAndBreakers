@@ -61,7 +61,7 @@
             <version>7.0.1-SNAPSHOT</version>
         </dependency>
 
-        <!--RedProtect core-->
+        <!--RedProtect-->
         <dependency>
             <groupId>br.net.fabiozumbi12.RedProtect</groupId>
             <artifactId>RedProtect-Core</artifactId>
@@ -73,6 +73,14 @@
             <artifactId>RedProtect-Spigot</artifactId>
             <version>LATEST</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.ryanhamshire</groupId>
+            <artifactId>GriefPRevention</artifactId>
+            <version>LATEST</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/GriefPrevention.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>

@@ -278,13 +278,27 @@ public class BlockListener implements Listener {
             return;
         }
         Dispenser d = (Dispenser) event.getBlock().getState();
-        if (BlockPlacersAndBreakers.getInstance().getBlockBreakers().contains(d.getLocation())){
+        BlockBreaker breaker = BlockBreaker.at(d.getLocation());
+        BlockPlacer placer = BlockPlacer.at(d.getLocation());
+        if (BlockPlacersAndBreakers.getInstance().getBlockBreakers().contains(breaker)){
+            assert breaker != null;
+            if (!event.getPlayer().getUniqueId().equals(breaker.getOwner()) && !event.getPlayer().hasPermission("bpb.blockbreaker.breakothers")){
+                event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "You cannot break block breakers that belong to other players!");
+                event.setCancelled(true);
+                return;
+            }
             event.getPlayer().sendMessage(BPB_PREFIX + "Block breaker broken");
-            BlockPlacersAndBreakers.getInstance().getBlockBreakers().remove(d.getLocation());
+            BlockPlacersAndBreakers.getInstance().getBlockBreakers().remove(breaker);
         }
-        if (BlockPlacersAndBreakers.getInstance().getBlockPlacers().contains(d.getLocation())){
+        if (BlockPlacersAndBreakers.getInstance().getBlockPlacers().contains(placer)){
+            assert placer != null;
+            if (!event.getPlayer().getUniqueId().equals(placer.getOwner()) && !event.getPlayer().hasPermission("bpb.blockbreaker.breakothers")){
+                event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "You cannot break block breakers that belong to other players!");
+                event.setCancelled(true);
+                return;
+            }
             event.getPlayer().sendMessage(BPB_PREFIX + "Block placer broken");
-            BlockPlacersAndBreakers.getInstance().getBlockPlacers().remove(d.getLocation());
+            BlockPlacersAndBreakers.getInstance().getBlockPlacers().remove(placer);
         }
         BlockPlacersAndBreakers.getInstance().updatePBFile();
 
@@ -312,14 +326,18 @@ public class BlockListener implements Listener {
             if (!rg.canBuild(event.getPlayer())){
                 event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "Block placers or breakers cannot place nor break blocks in this RedProtect region!");
                 event.setCancelled(true);
-                return;
             }
         }
-        if (BlockPlacersAndBreakers.getInstance().getWorldGuardPlugin() != null){
+        else if (BlockPlacersAndBreakers.getInstance().getWorldGuardPlugin() != null){
             if (!WorldGuardUtils.allowedToBuild(event.getPlayer(), relative)){
                 event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "Block placers or breakers cannot place nor break blocks in this WorldGuard region!");
                 event.setCancelled(true);
-                return;
+            }
+        }
+        else if (bpb.getGriefPreventionPlugin() != null){
+            if (bpb.getGriefPreventionPlugin().allowBuild(event.getPlayer(), relative) != null){
+                event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "Block placers or breakers cannot place nor break blocks in this GriefPrevention claim!");
+                event.setCancelled(true);
             }
         }
     }

@@ -35,7 +35,7 @@ public class InteractListener implements Listener {
         final Player p = event.getPlayer();
         final BlockPlacersAndBreakers bpb = BlockPlacersAndBreakers.getInstance();
         if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
-            if (!event.getPlayer().hasPermission("blockplacersandbreakers.blockbreaker.create") && !event.getPlayer().hasPermission("bpb.blockbreaker.create")){
+            if (!event.getPlayer().hasPermission("bpb.blockbreaker.create")){
                 event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "You have no permission to create block breakers");
                 return;
             }
@@ -65,7 +65,14 @@ public class InteractListener implements Listener {
                         return;
                     }
                 }
-                else if (!p.hasPermission("blockplacersandbreakers.blockplacer.limit.none") || !p.hasPermission("bpb.blockplacer.limit.none")){
+
+                if (bpb.getGriefPreventionPlugin() != null){
+                    if (bpb.getGriefPreventionPlugin().allowBuild(event.getPlayer(), d.getLocation()) != null){
+                        p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block placer in this GriefPrevention claim!");
+                        return;
+                    }
+                }
+                else if (!p.hasPermission("bpb.blockplacer.limit.none")){
                     int max = maxPlacers(p);
                     int existing = existingPlacers(p);
                     if (existing >= max){
@@ -94,7 +101,7 @@ public class InteractListener implements Listener {
             }
         } else if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)){
             //Check if player has permission to create
-            if (!event.getPlayer().hasPermission("blockplacersandbreakers.blockplacer.create") && !event.getPlayer().hasPermission("bpb.blockplacer.create")){
+            if (!event.getPlayer().hasPermission("bpb.blockplacer.create")){
                 event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "You have no permission to create block placers");
                 d.setCustomName(null);
                 return;
@@ -124,6 +131,12 @@ public class InteractListener implements Listener {
                     Region region = bpb.getRedProtectPlugin().getAPI().getRegion(d.getLocation());
                     if (!region.canBuild(p)){
                         p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block breaker in this RedProtect region!");
+                        return;
+                    }
+                }
+                if (bpb.getGriefPreventionPlugin() != null){
+                    if (bpb.getGriefPreventionPlugin().allowBuild(event.getPlayer(), d.getLocation()) != null){
+                        p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block breaker in this GriefPrevention claim!");
                         return;
                     }
                 }
@@ -162,7 +175,7 @@ public class InteractListener implements Listener {
     private int maxPlacers(Player player){
         int max = Integer.MAX_VALUE;
         for (int i = 0 ; i < max; i++){
-            if (player.hasPermission("blockplacersandbreakers.blockplacer.limit." + i) || player.hasPermission("bpb.blockplacer.limit." + i)){
+            if (player.hasPermission("bpb.blockplacer.limit." + i)){
                 return i;
             }
         }
@@ -172,7 +185,7 @@ public class InteractListener implements Listener {
     private int maxBreakers(Player player){
         int max = Integer.MAX_VALUE;
         for (int i = 0 ; i < max; i++){
-            if (player.hasPermission("blockplacersandbreakers.blockbreaker.limit." + i) || player.hasPermission("bpb.blockbreaker.limit." + i)){
+            if (player.hasPermission("bpb.blockbreaker.limit." + i)){
                 return i;
             }
         }

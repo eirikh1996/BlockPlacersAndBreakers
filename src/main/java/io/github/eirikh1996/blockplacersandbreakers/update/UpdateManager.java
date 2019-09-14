@@ -17,6 +17,11 @@ import java.net.URLConnection;
 
 public class UpdateManager extends BukkitRunnable {
     private static UpdateManager instance;
+    private boolean running = false;
+
+    private UpdateManager(){
+
+    }
     @Override
     public void run() {
         final double currentVersion = getCurrentVersion();
@@ -34,19 +39,27 @@ public class UpdateManager extends BukkitRunnable {
                 }
                 BlockPlacersAndBreakers.getInstance().getLogger().info("You are up to date");
             }
-        }.runTaskLater(BlockPlacersAndBreakers.getInstance(), 100);
+        }.runTaskLaterAsynchronously(BlockPlacersAndBreakers.getInstance(), 100);
 
     }
 
     public static void initialize(){
         instance = new UpdateManager();
-        instance.runTaskTimerAsynchronously(BlockPlacersAndBreakers.getInstance(), 260, 10000);
+
     }
 
     public static UpdateManager getInstance(){
         return instance;
     }
 
+    public boolean start(){
+        if (running){
+            return false;
+        }
+        instance.runTaskTimerAsynchronously(BlockPlacersAndBreakers.getInstance(), 0, 1000000);
+        running = true;
+        return true;
+    }
     public double getCurrentVersion(){
         return Double.parseDouble(BlockPlacersAndBreakers.getInstance().getDescription().getVersion());
     }
