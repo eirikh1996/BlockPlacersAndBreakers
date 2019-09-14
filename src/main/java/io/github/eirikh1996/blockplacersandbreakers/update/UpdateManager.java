@@ -81,7 +81,6 @@ public class UpdateManager extends BukkitRunnable {
             JSONObject jsonObject = (JSONObject) jsonArray.get(jsonArray.size() - 1);
             String versionName = ((String) jsonObject.get("name"));
             String newVersion = versionName.substring(versionName.lastIndexOf("v") + 1);
-            BlockPlacersAndBreakers.getInstance().getLogger().info(newVersion);
             return Double.parseDouble(newVersion);
         } catch (Exception e) {
             e.printStackTrace();
