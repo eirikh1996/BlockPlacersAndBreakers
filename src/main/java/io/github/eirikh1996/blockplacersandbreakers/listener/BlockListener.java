@@ -103,34 +103,7 @@ public class BlockListener implements Listener {
                     continue;
                 replace.add(i);
             }
-            final ArrayList<ItemStack> drops = new ArrayList<>(b.getDrops());
-            final Set<ItemStack> newDrops = new HashSet<>();
-            boolean silkTouch = false;
-            for (Enchantment ench : dispensed.getItemMeta().getEnchants().keySet()){
-                int level = dispensed.getEnchantmentLevel(ench);
-                if (ench.equals(Enchantment.SILK_TOUCH)){
-                    final Material dropType = b.getType();
-                    newDrops.add(new ItemStack(dropType));
-                    silkTouch = true;
-                }
-                if (ench.equals(Enchantment.LOOT_BONUS_BLOCKS) && MINERAL_ORES.contains(b.getType())){
-                    Random rand = new Random();
-                    Material dropType = drops.get(0).getType();
-                    int dropMultiplier;
-                    if (level == 1){
-                        dropMultiplier = 1 + rand.nextInt(3);
-                    } else if (level == 2){
-                        dropMultiplier = 2 + rand.nextInt(2);
-                    } else {
-                        dropMultiplier = 3 + rand.nextInt(2);
-                    }
 
-                    for (int i = 1 ; i <= dropMultiplier ; i++){
-                        newDrops.add(new ItemStack(dropType));
-                    }
-                }
-
-            }
             //Call event
             BlockBreakerBreakBlockEvent breakBlockEvent = new BlockBreakerBreakBlockEvent(b, BlockBreaker.at(d.getLocation()));
             Bukkit.getServer().getPluginManager().callEvent(breakBlockEvent);
@@ -141,17 +114,8 @@ public class BlockListener implements Listener {
                 }
                 return;
             }
-            if (silkTouch){
-                b.setType(Material.AIR);
-            } else {
-                b.breakNaturally();
-            }
+            b.breakNaturally(dispensed);
 
-            if (!newDrops.isEmpty()){
-                for (ItemStack drop : newDrops){
-                    b.getWorld().dropItemNaturally(b.getLocation(), drop);
-                }
-            }
 
 
     if (Settings.ApplyDamageToBreakerPickaxe) {
@@ -323,7 +287,8 @@ public class BlockListener implements Listener {
         if (BlockPlacersAndBreakers.getInstance().getRedProtectPlugin() != null){
             RedProtect rp = BlockPlacersAndBreakers.getInstance().getRedProtectPlugin();
             Region rg = rp.getAPI().getRegion(relative);
-            if (!rg.canBuild(event.getPlayer())){
+            if (rg != null && !rg.canBuild(event.getPlayer())){
+                Bukkit.broadcastMessage(String.valueOf(event.getPlayer()));
                 event.getPlayer().sendMessage(BPB_PREFIX + ERROR + "Block placers or breakers cannot place nor break blocks in this RedProtect region!");
                 event.setCancelled(true);
             }

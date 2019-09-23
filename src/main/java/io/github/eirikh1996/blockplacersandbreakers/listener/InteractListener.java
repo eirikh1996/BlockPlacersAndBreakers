@@ -9,9 +9,11 @@ import io.github.eirikh1996.blockplacersandbreakers.objects.BlockBreaker;
 import io.github.eirikh1996.blockplacersandbreakers.objects.BlockPlacer;
 import io.github.eirikh1996.blockplacersandbreakers.utils.WorldGuardUtils;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Dispenser;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -21,7 +23,7 @@ import static io.github.eirikh1996.blockplacersandbreakers.Messages.ERROR;
 
 public class InteractListener implements Listener {
     private Economy eco = BlockPlacersAndBreakers.getInstance().getEconomy();
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onDispenserClick(PlayerInteractEvent event){
         if (event.getItem() == null)
             return;
@@ -57,10 +59,9 @@ public class InteractListener implements Listener {
                     p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block placer in this WorldGuard region!");
                     return;
                 }
-                //Check if player can create block placers in a RedProtect region
                 if (bpb.getRedProtectPlugin() != null){
                     Region region = bpb.getRedProtectPlugin().getAPI().getRegion(d.getLocation());
-                    if (!region.canBuild(p)){
+                    if (region != null && !region.canBuild(p)){
                         p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block placer in this RedProtect region!");
                         return;
                     }
@@ -129,7 +130,7 @@ public class InteractListener implements Listener {
                 }
                 if (bpb.getRedProtectPlugin() != null){
                     Region region = bpb.getRedProtectPlugin().getAPI().getRegion(d.getLocation());
-                    if (!region.canBuild(p)){
+                    if (region != null && !region.canBuild(p)){
                         p.sendMessage(BPB_PREFIX + ERROR + "You cannot create a block breaker in this RedProtect region!");
                         return;
                     }

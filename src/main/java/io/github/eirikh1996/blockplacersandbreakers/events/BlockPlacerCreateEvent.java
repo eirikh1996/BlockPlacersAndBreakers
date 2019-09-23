@@ -33,20 +33,36 @@ public class BlockPlacerCreateEvent extends BPBevent implements Cancellable {
         return creator;
     }
 
+    /**
+     * Gets the cancellation state of this event
+     * @return the cancellation state of this event
+     */
     @Override
     public boolean isCancelled() {
         return cancelled;
     }
 
+    /**
+     * Sets the cancellation state of this event
+     * @param cancelled cancellation state
+     */
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
 
+    /**
+     * Gets the cancellation message for this event
+     * @return the cancellation message for this event
+     */
     public String getCancellationMessage() {
         return cancellationMessage;
     }
 
+    /**
+     * Sets a cancellation message for this event, which is sent to the block placer's owner if the event is cancelled
+     * @param cancellationMessage the cancellation message
+     */
     public void setCancellationMessage(String cancellationMessage) {
         this.cancellationMessage = cancellationMessage;
     }

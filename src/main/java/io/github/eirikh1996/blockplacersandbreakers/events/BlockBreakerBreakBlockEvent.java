@@ -25,28 +25,52 @@ public class BlockBreakerBreakBlockEvent extends BPBevent implements Cancellable
         return HANDLERS;
     }
 
+    /**
+     * Gets the block breaker involved in this event
+     * @return the block breaker involved in this event
+     */
     public BlockBreaker getBlockBreaker() {
         return blockBreaker;
     }
 
+    /**
+     * Gets the block broken in this event
+     * @return the block broken in this event
+     */
     public Block getBroken() {
         return broken;
     }
 
+    /**
+     * Gets the cancellation state of this event
+     * @return the cancellation state of this event
+     */
     @Override
     public boolean isCancelled() {
         return cancelled;
     }
 
+    /**
+     * Sets the cancellation state of this event
+     * @param cancelled cancellation state
+     */
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
 
+    /**
+     * Gets the cancellation message for this event
+     * @return the cancellation message for this event
+     */
     public String getCancellationMessage() {
         return cancellationMessage;
     }
 
+    /**
+     * Sets a cancellation message for this event, which is sent to the block placer's owner if the event is cancelled
+     * @param cancellationMessage the cancellation message
+     */
     public void setCancellationMessage(String cancellationMessage) {
         this.cancellationMessage = cancellationMessage;
     }
